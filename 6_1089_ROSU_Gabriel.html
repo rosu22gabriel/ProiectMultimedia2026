@@ -26,12 +26,15 @@
 1p - salvarea automată a desenului curent și reîncărcare la pornire cu ajutorul Web Storage API (sau a unui alt API similar)  -->
     </div>
     <div id="svg-container">
-        <svg id="svg-canvas">
-
-        </svg>
+        
     </div>
 
+    <script type="module">
+        import { SVGEditor } from './6_1089_ROSU_Gabriel.js';
 
-    
+        const svgEditor = new SVGEditor('#svg-container', '#tool-bar');
+
+    </script>
+
 </body>
 </html>
