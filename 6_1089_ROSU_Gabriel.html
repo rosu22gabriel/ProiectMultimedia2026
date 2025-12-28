@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editor SVG</title>
+    <link rel="stylesheet" href="6_1089_ROSU_Gabriel.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+</head>
+<body>
+    <div id="tool-bar">
+        <button class="tool" id="undo"><i class="bi bi-arrow-return-left"></i></button>
+        <button class="tool" id="add-shape"><i class="bi bi-diamond"></i></button>
+        <button class="tool" id="add-line"><i class="bi bi-pen"></i></button>
+        <button class="tool" id="select"><i class="bi bi-hand-index"></i></button>
+        <button class="tool" id="export-raster"><i class="bi bi-image"></i></button>
+        <button class="tool" id="save-as-svg"><i class="bi bi-file-earmark-arrow-down-fill"></i></button>
+<!-- 1p - suport pentru adăugare elemente geometrice de bază (linie, elipsă, dreptunghi)  
+0.5p - suport pentru selectarea culorii și grosimii liniei pentru adăugare 
+2p - suport pentru selecție și ștergere  modificare elemente existente (proprietăți: culoare și grosime linie, culoare fundal) 
+1p - suport pentru anularea ultimelor n operații (undo) 
+1.5p - suport pentru mutare elemente utilizând mouse-ul 
+2p - suport pentru desenare căi cu editarea ulterioară a punctelor 
+1p - funcționalitate de export în format raster (*.png sau *.jpeg) 
+0.5p - posibilitate salvare desen în format SVG 
+1p - salvarea automată a desenului curent și reîncărcare la pornire cu ajutorul Web Storage API (sau a unui alt API similar)  -->
+    </div>
+    <div id="svg-container">
+        <svg id="svg-canvas">
+
+        </svg>
+    </div>
+
+
+    
+</body>
+</html>
