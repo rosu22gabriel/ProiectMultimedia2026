@@ -9,30 +9,74 @@
 </head>
 <body>
     <div id="tool-bar">
-        <button class="tool" id="undo"><i class="bi bi-arrow-return-left"></i></button>
-        <button class="tool" id="add-shape"><i class="bi bi-diamond"></i></button>
-        <button class="tool" id="add-line"><i class="bi bi-pen"></i></button>
-        <button class="tool" id="select"><i class="bi bi-hand-index"></i></button>
-        <button class="tool" id="export-raster"><i class="bi bi-image"></i></button>
-        <button class="tool" id="save-as-svg"><i class="bi bi-file-earmark-arrow-down-fill"></i></button>
-<!-- 1p - suport pentru adăugare elemente geometrice de bază (linie, elipsă, dreptunghi)  
-0.5p - suport pentru selectarea culorii și grosimii liniei pentru adăugare 
-2p - suport pentru selecție și ștergere  modificare elemente existente (proprietăți: culoare și grosime linie, culoare fundal) 
-1p - suport pentru anularea ultimelor n operații (undo) 
-1.5p - suport pentru mutare elemente utilizând mouse-ul 
-2p - suport pentru desenare căi cu editarea ulterioară a punctelor 
-1p - funcționalitate de export în format raster (*.png sau *.jpeg) 
-0.5p - posibilitate salvare desen în format SVG 
-1p - salvarea automată a desenului curent și reîncărcare la pornire cu ajutorul Web Storage API (sau a unui alt API similar)  -->
+        <button class="tool" id="undo"><i class="bi bi-arrow-return-left" title="Undo"></i></button>
+        <button class="tool" id="choose-shape">
+            <i class="bi bi-diamond" title="choose shape" style="position: relative"></i>
+            <div id="shape-selector" class="popup-menu hidden">
+                <div class="shape-option" data-shape="Rectangle" title="Rectangle"><i class="bi bi-square"></i></div>
+                <div class="shape-option" data-shape="Elipse" title="Elipse"><i class="bi bi-circle"></i></div>
+                <div class="shape-option" data-shape="Line" title="Line"><i class="bi bi-dash"></i></div>
+            </div>
+        </button>
+        
+        <button class="tool" id="draw-path"><i class="bi bi-pen" title="Draw Path"></i></button>
+        <button class="tool" id="select-shape"><i class="bi bi-hand-index" title="Select"></i></button>
+        <button class="tool" id="export-raster"><i class="bi bi-image" title="Export Raster"></i></button>
+        <button class="tool" id="save-as-svg"><i class="bi bi-file-earmark-arrow-down-fill" title="Save as SVG"></i></button>
+        
     </div>
     <div id="svg-container">
-        
+        <svg id="svg-canvas">Your browser doesn't support SVG</svg>
     </div>
 
     <script type="module">
         import { SVGEditor } from './6_1089_ROSU_Gabriel.js';
+        import { Elipse, Rectangle, Line } from './6_1089_ROSU_Gabriel.js';
 
-        const svgEditor = new SVGEditor('#svg-container', '#tool-bar');
+        const undoBtn = document.getElementById('undo');
+        const chooseShapeBtn = document.getElementById('choose-shape');
+        const selectShapeBtn = document.getElementById('select-shape');
+        const drawPathBtn = document.getElementById('draw-path');
+        const exportRasterBtn = document.getElementById('export-raster');
+        const saveAsSvgBtn = document.getElementById('save-as-svg');
+
+        const shapeSelector = document.getElementById('shape-selector');
+        let currentSelectedShape = null;
+
+        // 1. Toggle the menu
+        chooseShapeBtn.addEventListener('click', (e) => {
+            // Stop propagation so clicking the button doesn't trigger "close" listeners
+            e.stopPropagation(); 
+            shapeSelector.classList.toggle('hidden');
+        });
+
+        // 2. Select a shape and close menu
+        shapeSelector.querySelectorAll('.shape-option').forEach(option => {
+            option.addEventListener('click', (e) => {
+                currentSelectedShape = e.currentTarget.dataset.shape;
+                console.log("Active tool set to:", currentSelectedShape);
+                
+                // Visual feedback: change the main button icon
+                const icon = option.querySelector('i').className;
+                chooseShapeBtn.querySelector('i').className = icon;
+
+                shapeSelector.classList.add('hidden');
+            });
+        });
+
+        // 3. Close menu if user clicks anywhere else
+        document.addEventListener('click', () => {
+            shapeSelector.classList.add('hidden');
+        });
+
+
+        const svgEditor = new SVGEditor('svg-canvas');
+        svgEditor.addShape(new Elipse(100, 100, 50, 30, "red", 2));
+        svgEditor.addShape(new Rectangle(200, 200, 80, 60, "blue", 3));
+        svgEditor.addShape(new Line(300, 300, 400, 400, "green", 4));
+
+
+
 
     </script>
 
