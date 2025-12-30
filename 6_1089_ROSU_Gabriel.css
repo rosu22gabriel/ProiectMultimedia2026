@@ -42,8 +42,8 @@ html, body {
 
 #svg-container #svg-canvas { 
     background-color: whitesmoke;
-    width: 400px;
-    height: 300px;
+    width: 550px;
+    height: 450px;
     margin: auto;
     border: 1px solid black;
 }
