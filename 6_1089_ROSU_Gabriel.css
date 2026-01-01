@@ -76,3 +76,21 @@ html, body {
 .hidden {
     display: none;
 }
+
+/*Override top, left attributes for specific positioning */
+#width-selector-menu {
+    top: 75px; 
+    left: 450px;
+}
+
+.width-option {
+    padding: 2px;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #333;
+}
+
+.width-option:hover {
+    background-color: #f0f0f0;
+    color: #007bff;
+}

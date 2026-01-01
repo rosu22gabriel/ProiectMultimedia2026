@@ -9,22 +9,63 @@
 </head>
 <body>
     <div id="tool-bar">
-        <button class="tool" id="undo-btn"><i class="bi bi-arrow-return-left" title="Undo"></i></button>
-        <button class="tool" id="choose-shape-btn">
-            <i class="bi bi-diamond" title="choose shape" style="position: relative"></i>
-            <div id="shape-selector" class="popup-menu hidden">
-                <div class="shape-option" data-shape="Rectangle" title="Rectangle"><i class="bi bi-square"></i></div>
-                <div class="shape-option" data-shape="Elipse" title="Elipse"><i class="bi bi-circle"></i></div>
-                <div class="shape-option" data-shape="Line" title="Line"><i class="bi bi-dash"></i></div>
-            </div>
+        <button class="tool" id="undo-btn">
+            <i class="bi bi-arrow-return-left" title="Undo"></i>
         </button>
+
+        <button class="tool" id="choose-shape-btn">
+            <i class="bi bi-diamond" title="Choose Shape" style="position: relative"></i>
+        </button>
+
+        <!-- This div element contains a pop-up menu that only appears the the user click on the choose shape button -->
+        <div id="shape-selector-menu" class="popup-menu hidden">
+            <div class="shape-option" data-shape="Rectangle" title="Rectangle"><i class="bi bi-square"></i></div>
+            <div class="shape-option" data-shape="Elipse" title="Elipse"><i class="bi bi-circle"></i></div>
+            <div class="shape-option" data-shape="Line" title="Line"><i class="bi bi-dash"></i></div>
+        </div>
         
-        <button class="tool" id="draw-path-btn"><i class="bi bi-pen" title="Draw Path"></i></button>
-        <button class="tool" id="select-btn"><i class="bi bi-hand-index" title="Select"></i></button>
-        <button class="tool" id="export-raster-btn"><i class="bi bi-image" title="Export Raster"></i></button>
-        <button class="tool" id="save-as-svg-btn"><i class="bi bi-file-earmark-arrow-down-fill" title="Save as SVG"></i></button>
+        <button class="tool" id="draw-path-btn">
+            <i class="bi bi-pen" title="Draw Path"></i>
+        </button>
+
+        <button class="tool" id="select-btn">
+            <i class="bi bi-hand-index" title="Select"></i>
+        </button>
+
+        <button class="tool" id="export-raster-btn">
+            <i class="bi bi-image" title="Export Raster"></i>
+        </button>
+
+        <button class="tool" id="save-as-svg-btn">
+            <i class="bi bi-file-earmark-arrow-down-fill" title="Save as SVG"></i>
+        </button>
+
+        <!-- These buttons appear on the toolbar layout when a shape is selected -->
+        <div id="shape-properties-tools" class="hidden" style="margin-left: 100px">
+
+            <button class="tool" id="select-stroke-color-btn">
+                <i class="bi bi-eyedropper" title="Select Stroke Color"></i>
+            </button>
+
+            <div id="width-selector-menu" class="popup-menu hidden"> 
+                <div class="width-option" data-width="1">1px</div>
+                <div class="width-option" data-width="2">2px</div>
+                <div class="width-option" data-width="4">4px</div>
+                <div class="width-option" data-width="8">8px</div>
+            </div>
+
+
+            <button class="tool" id="select-stroke-width-btn">
+                <i class="bi bi-border-width" title="Select Stroke Width"></i>
+            </button>
+
+            <button class="tool" id="select-fill-color-btn">
+                <i class="bi bi-paint-bucket" title="Select Fill Color"></i>
+            </button>
+        </div>
         
     </div>
+
     <div id="svg-container">
         <svg id="svg-canvas">Your browser doesn't support SVG</svg>
     </div>
@@ -34,31 +75,48 @@
     <script type="text/javascript">
         // Event handlers for a pop-up menu of shapes to be selected by the user
         const chooseShapeBtn = document.getElementById('choose-shape-btn');
-        const shapeSelector = document.getElementById('shape-selector');
+        const selectStrokeColorBtn = document.getElementById('select-stroke-color-btn');
+        const selectStrokeWidthBtn = document.getElementById('select-stroke-width-btn');
+        const selectFillColorBtn = document.getElementById('select-fill-color-btn');
+        const shapeSelectorMenu = document.getElementById('shape-selector-menu');
+        const shapePropertiesTools = document.getElementById('shape-properties-tools');
+        const widthSelectorMenu = document.getElementById('width-selector-menu');
 
         
-        // Toggle the menu
+        // Toggle the shape selection menu
         chooseShapeBtn.addEventListener('click', (e) => {
             // Stop propagation so clicking the button doesn't trigger "close" listeners
             e.stopPropagation(); 
-            shapeSelector.classList.toggle('hidden');
+            shapeSelectorMenu.classList.toggle('hidden');
         });
 
         let currentSelectedShape = null;
+        let currentSelectedStrokeWidth = null;
+        let currentSelectedFillColor = null;
+        let currentSelectedStrokeColor = null;
         
         // Select a shape and close menu
-        shapeSelector.querySelectorAll('.shape-option').forEach(option => {
+        shapeSelectorMenu.querySelectorAll('.shape-option').forEach(option => {
             option.addEventListener('click', (e) => {
+                // When a shape is selected, an extension of the toolbar appears with options for setting shape properties
+                shapePropertiesTools.classList.remove('hidden');
+
                 currentSelectedShape = e.currentTarget.dataset.shape;
                 console.log("Active tool set to:", currentSelectedShape);
                 
-                shapeSelector.classList.add('hidden');
+                shapeSelectorMenu.classList.add('hidden');
             });
+        });
+
+        // Toggle the stroke width selection menu
+        selectStrokeWidthBtn.addEventListener('click', (e) => {
+            e.stopPropagation(); // Stop propagation so clicking the button doesn't trigger "close" listeners
+            widthSelectorMenu.classList.toggle('hidden');
         });
 
         // Close menu if user clicks anywhere else
         document.addEventListener('click', () => {
-            shapeSelector.classList.add('hidden');
+            shapeSelectorMenu.classList.add('hidden');
         });
     </script>
 
@@ -78,9 +136,6 @@
 
 
         const svgEditor = new SVGEditor('svg-canvas');
-        svgEditor.addShape(new Elipse(100, 100, 50, 30, "red", 2));
-        svgEditor.addShape(new Rectangle(200, 200, 80, 60, "blue", 3));
-        svgEditor.addShape(new Line(300, 300, 400, 400, "green", 4));
 
         // addShape, moveShape, deleteShape
         
@@ -88,11 +143,14 @@
         // First, the user selects a shape from the pop-up menu (handled in the previous script)
         // Then, when the user clicks on the SVG canvas, we add the selected shape at that mouse position
 
+        // Also, this event listener should display on the toolbar two new button for selecting the stroke color and stroke width of the new shape
+
 
         svgEditor.svgCanvas.addEventListener('click', (e) => {
             // Element.getBoundingClientRect() gives the position of the SVG canvas relative to the viewport
             // We need this to calculate the mouse position within the SVG canvas
             const rect = svgEditor.svgCanvas.getBoundingClientRect();
+
             // Calculate mouse position within the SVG canvas
             // e.clientX and e.clientY give the mouse position relative to the viewport
             // Subtract the SVG canvas position to get the position within the SVG canvas
@@ -110,6 +168,14 @@
                 svgEditor.addShape(newLine);
             }
         });
+
+        // Logic for moving a selected shape
+        // When the user clicks the "Select" button, they can click on a shape to select it and drop it to a new position
+
+
+
+
+
 
     </script>
 

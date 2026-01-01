@@ -55,6 +55,12 @@ class Shape {
     // Getter for the SVGEditor to access the element
     get element() { return this._element; }
     get isSelected() { return this._isSelected; }
+
+    // Getters and setters for common properties
+    get color() { return this._color; }
+    set color(value) { this._color = value; this.update(); }
+    get strokeWidth() { return this._strokeWidth; }
+    set strokeWidth(value) { this._strokeWidth = value; this.update(); }
 }
 
 export class Elipse extends Shape {
@@ -81,6 +87,7 @@ export class Elipse extends Shape {
         super.update(); // Apply common styles
         return this._element;
     }
+
 }
 
 export class Rectangle extends Shape {
@@ -132,6 +139,7 @@ export class Line extends Shape {
         super.update(); // Apply common styles
         return this._element;
     }
+
 }
 
 
