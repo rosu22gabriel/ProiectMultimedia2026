@@ -47,7 +47,7 @@
         <!--This is an extension of the main tool-bar that only appears when selecting a shape -->
         <div id="shape-properties-tools" class="hidden" style="margin-left: 100px">
 
-            <button class="tool" id="select-stroke-color-btn">
+            <button class="tool" id="select-stroke-color-btn" title="Select Stroke Color">
                 <i class="bi bi-eyedropper" title="Select Stroke Color"></i>
             </button>
 
@@ -59,7 +59,7 @@
                 <div class="stroke-color-option" data-stroke-color="black" style="background-color: black"></div>
             </div>
 
-            <button class="tool" id="select-stroke-width-btn">
+            <button class="tool" id="select-stroke-width-btn" title="Select Stroke Width">
                 <i class="bi bi-border-width" title="Select Stroke Width"></i>
             </button>
 
@@ -71,7 +71,7 @@
                 <div class="width-option" data-width="8">8px</div>
             </div>
             
-            <button class="tool" id="select-fill-color-btn">
+            <button class="tool" id="select-fill-color-btn" title="Select Fill Color">
                 <i class="bi bi-paint-bucket" title="Select Fill Color"></i>
             </button>
 
@@ -124,6 +124,7 @@
         
 
         // ================================== SHAPE SELECTION LOGIC ================================ \\
+
         // Toggle the shape selection menu
         chooseShapeBtn.addEventListener('click', (e) => {
             // Stop propagation so clicking the button doesn't trigger "close" listeners
@@ -139,12 +140,12 @@
         shapeSelectorMenu.querySelectorAll('.shape-option').forEach(option => {
             option.addEventListener('click', (e) => {
                 // When a shape is selected, an extension of the toolbar appears with options for setting shape properties
-                shapePropertiesTools.classList.remove('hidden');
+                shapePropertiesTools.classList.toggle('hidden');
 
                 currentSelectedShape = e.currentTarget.dataset.shape;
-                console.log("Active tool set to:", currentSelectedShape);
+                console.log("Active shape set to:", currentSelectedShape);
                 
-                shapeSelectorMenu.classList.add('hidden');
+                shapeSelectorMenu.classList.toggle('hidden');
             });
         });
         
@@ -155,6 +156,7 @@
             shapeSelectorMenu.classList.add('hidden');
         });
 
+
         // ===================================== WIDTH SELECTION LOGIC =============================== \\
 
         // Toggle the stroke width selection menu
@@ -162,11 +164,22 @@
             e.stopPropagation(); // Stop propagation so clicking the button doesn't trigger "close" listeners
             widthSelectorMenu.classList.toggle('hidden');
         });
+
+
+        widthSelectorMenu.querySelectorAll('.width-option').forEach(option => {
+            option.addEventListener('click', (e) => {
+                currentSelectedStrokeWidth = e.currentTarget.dataset.width;
+                console.log("Active width option set to:", `${currentSelectedStrokeWidth}px`);
+                
+                widthSelectorMenu.classList.toggle('hidden');
+            })
+        })
         
         // Close stroke width selection menu if user clicks anywhere else
         document.addEventListener('click', () => {
             widthSelectorMenu.classList.add('hidden');
         });
+
 
         // ==================================== FILL COLOR SELECTION LOGIC ================================ \\
 
@@ -175,6 +188,15 @@
             e.stopPropagation(); // Stop propagation so clicking the button doesn't trigger "close" listeners
             fillColorSelectorMenu.classList.toggle('hidden');
         });
+
+        fillColorSelectorMenu.querySelectorAll('.fill-color-option').forEach(option => {
+            option.addEventListener('click', (e) => {
+                currentSelectedFillColor = e.currentTarget.dataset.fillColor;
+                console.log("Active fill color option set to:", currentSelectedFillColor);
+
+                fillColorSelectorMenu.classList.toggle('hidden');
+            })
+        })
 
         // Close fill color selection menu if user clicks anywhere else
         document.addEventListener('click', () => {
@@ -190,6 +212,15 @@
             strokeColorSelectorMenu.classList.toggle('hidden');
         });
 
+        strokeColorSelectorMenu.querySelectorAll('.stroke-color-option').forEach(option => {
+            option.addEventListener('click', (e) => {
+                currentSelectedStrokeColor = e.currentTarget.dataset.strokeColor;
+                console.log("Active stroke color option set to:", currentSelectedStrokeColor);
+
+                strokeColorSelectorMenu.classList.toggle('hidden');
+            });
+        });
+
         // Close stroke color selection menu if user clicks anywhere else
         document.addEventListener('click', () => {
             strokeColorSelectorMenu.classList.add('hidden');
@@ -197,7 +228,8 @@
 
     </script>
 
-    <!----------------------------SVGEDITOR LOGIC--------------------------------------->
+
+    <!----------------------------SVG-EDITOR LOGIC--------------------------------------->
     <!-- This script element contains SVGEditor manipulation logic-->
     <script type="module">
         // Imports from the *.js file
@@ -228,13 +260,13 @@
             const y = e.clientY - rect.top;
 
             if (currentSelectedShape === 'Rectangle') {
-                const newRect = new Rectangle(x - 40, y - 30, 80, 60, "black", 2);
+                const newRect = new Rectangle(x - 40, y - 30, 80, 60, currentSelectedStrokeColor, currentSelectedFillColor, currentSelectedStrokeWidth);
                 svgEditor.addShape(newRect);
             } else if (currentSelectedShape === 'Elipse') {
-                const newElipse = new Elipse(x, y, 50, 30, "black", 2);
+                const newElipse = new Elipse(x, y, 50, 30, currentSelectedStrokeColor, currentSelectedFillColor, currentSelectedStrokeWidth);
                 svgEditor.addShape(newElipse);
             } else if (currentSelectedShape === 'Line') {
-                const newLine = new Line(x - 50, y - 50, x + 50, y + 50, "black", 2);
+                const newLine = new Line(x - 50, y - 50, x + 50, y + 50, currentSelectedStrokeColor, currentSelectedFillColor. currentSelectedStrokeWidth);
                 svgEditor.addShape(newLine);
             }
         });

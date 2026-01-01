@@ -21,18 +21,20 @@ class Shape {
      * @property {number} x - x coordinate of the shape
      * @property {number} y - y coordinate of the shape
      * @property {string} color - color of the shape's stroke/outline color (e.g. 'black', '#000000')
+     * @property {string} fillColor - color of the shape's inside (e.g. 'black', '#000000')
      * @property {number} strokeWidth - width of the shape's outline 
      * @property {HTMLElement|null} element - The SVG element associated with the shape (once rendered)
      * @property {boolean} isSelected - Flag indicating if the shape is currently selected
      */
 
-    _x; _y; _color; _strokeWidth; _element; _isSelected;
+    _x; _y; _color; _fillColor; _strokeWidth; _element; _isSelected;
 
 
-    constructor(x, y, color = "black", strokeWidth = 1) {
+    constructor(x, y, color = "black", fillColor='transparent', strokeWidth = 1) {
         this._x = x;
         this._y = y;
         this._color = color;
+        this._fillColor = fillColor;
         this._strokeWidth = strokeWidth;
         this._isSelected = false;
         this._element = null; 
@@ -48,7 +50,8 @@ class Shape {
     update() {
         if (!this._element) return;
         this._element.setAttribute("stroke", this._color);
-        this._element.setAttribute("stroke-width", this._strokeWidth);   
+        this._element.setAttribute("stroke-width", this._strokeWidth);
+        this._element.setAttribute("fill", this._fillColor); 
         // Position attributes will be set in derived classes
     }
     
@@ -59,6 +62,8 @@ class Shape {
     // Getters and setters for common properties
     get color() { return this._color; }
     set color(value) { this._color = value; this.update(); }
+    get fillColor() { return this._fillColor; }
+    set fillColor(value) { this._fillColor = value; this.update(); }
     get strokeWidth() { return this._strokeWidth; }
     set strokeWidth(value) { this._strokeWidth = value; this.update(); }
 }
@@ -67,9 +72,9 @@ export class Elipse extends Shape {
     // aRadius, bRadius properties specific to Elipse
     aRadius; bRadius;
     
-    constructor(x, y, aRadius, bRadius, color = "black", strokeWidth = 1) {
+    constructor(x, y, aRadius, bRadius, color = "black", fillColor="transparent", strokeWidth = 1) {
         // Call the base class constructor
-        super(x, y, color, strokeWidth);
+        super(x, y, color, fillColor, strokeWidth);
         this.aRadius = aRadius;
         this.bRadius = bRadius;
     }
@@ -94,9 +99,9 @@ export class Rectangle extends Shape {
     // Width and Height properties specific to Rectangle
     _width; _height;
 
-    constructor(x, y, width, height, color = "black", strokeWidth = 1) {
+    constructor(x, y, width, height, color = "black", fillColor="transparent",strokeWidth = 1) {
         // Call the base class constructor
-        super(x, y, color, strokeWidth);
+        super(x, y, color, fillColor, strokeWidth);
         this._width = width;
         this._height = height;
     }
@@ -120,9 +125,9 @@ export class Line extends Shape {
     // End coordinates specific to Line
     _x2; _y2;
 
-    constructor(x1, y1, x2, y2, color = "black", strokeWidth = 1) {
+    constructor(x1, y1, x2, y2, color = "black", fillColor = "transparent", strokeWidth = 1) {
         // Call the base class constructor  
-        super(x1, y1, color, strokeWidth);
+        super(x1, y1, color, fillColor, strokeWidth);
         this._x2 = x2;
         this._y2 = y2;
     }
