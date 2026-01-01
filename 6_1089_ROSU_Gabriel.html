@@ -47,21 +47,34 @@
                 <i class="bi bi-eyedropper" title="Select Stroke Color"></i>
             </button>
 
+            <div id="stroke-color-selector-menu" class="popup-menu hidden"> 
+                <div class="stroke-color-option" data-stroke-color="red" style="background-color: red"></div>
+                <div class="stroke-color-option" data-stroke-color="blue" style="background-color: blue"></div>
+                <div class="stroke-color-option" data-stroke-color="green" style="background-color: green"></div>
+                <div class="stroke-color-option" data-stroke-color="black" style="background-color: black"></div>
+            </div>
+
+            <button class="tool" id="select-stroke-width-btn">
+                <i class="bi bi-border-width" title="Select Stroke Width"></i>
+            </button>
+
             <div id="width-selector-menu" class="popup-menu hidden"> 
                 <div class="width-option" data-width="1">1px</div>
                 <div class="width-option" data-width="2">2px</div>
                 <div class="width-option" data-width="4">4px</div>
                 <div class="width-option" data-width="8">8px</div>
             </div>
-
-
-            <button class="tool" id="select-stroke-width-btn">
-                <i class="bi bi-border-width" title="Select Stroke Width"></i>
-            </button>
-
+            
             <button class="tool" id="select-fill-color-btn">
                 <i class="bi bi-paint-bucket" title="Select Fill Color"></i>
             </button>
+
+            <div id="fill-color-selector-menu" class="popup-menu hidden">
+                <div class="fill-color-option" data-fill-color="red" style="background-color: red"></div>
+                <div class="fill-color-option" data-fill-color="blue" style="background-color: blue"></div>
+                <div class="fill-color-option" data-fill-color="green" style="background-color: green"></div>
+                <div class="fill-color-option" data-fill-color="black" style="background-color: black"></div>
+            </div>
         </div>
         
     </div>
@@ -79,6 +92,8 @@
         const selectStrokeWidthBtn = document.getElementById('select-stroke-width-btn');
         const selectFillColorBtn = document.getElementById('select-fill-color-btn');
         const shapeSelectorMenu = document.getElementById('shape-selector-menu');
+        const fillColorSelectorMenu = document.getElementById('fill-color-selector-menu');
+        const strokeColorSelectorMenu = document.getElementById('stroke-color-selector-menu');
         const shapePropertiesTools = document.getElementById('shape-properties-tools');
         const widthSelectorMenu = document.getElementById('width-selector-menu');
 
@@ -114,10 +129,37 @@
             widthSelectorMenu.classList.toggle('hidden');
         });
 
-        // Close menu if user clicks anywhere else
+        // Toggle the fill color selection menu
+        selectFillColorBtn.addEventListener('click', (e) => {
+            e.stopPropagation(); // Stop propagation so clicking the button doesn't trigger "close" listeners
+            fillColorSelectorMenu.classList.toggle('hidden');
+        });
+
+        selectStrokeColorBtn.addEventListener('click', (e) => {
+            e.stopPropagation(); // Stop propagation so clicking the button doesn't trigger "close" listeners
+            strokeColorSelectorMenu.classList.toggle('hidden');
+        });
+
+        // Close shape selection menu if user clicks anywhere else
         document.addEventListener('click', () => {
             shapeSelectorMenu.classList.add('hidden');
         });
+
+        // Close stroke width selection menu if user clicks anywhere else
+        document.addEventListener('click', () => {
+            widthSelectorMenu.classList.add('hidden');
+        });
+
+        // Close fill color selection menu if user clicks anywhere else
+        document.addEventListener('click', () => {
+            fillColorSelectorMenu.classList.add('hidden');
+        });
+
+        // Close stroke color selection menu if user clicks anywhere else
+        document.addEventListener('click', () => {
+            strokeColorSelectorMenu.classList.add('hidden');
+        });
+
     </script>
 
 
@@ -171,12 +213,6 @@
 
         // Logic for moving a selected shape
         // When the user clicks the "Select" button, they can click on a shape to select it and drop it to a new position
-
-
-
-
-
-
     </script>
 
 </body>

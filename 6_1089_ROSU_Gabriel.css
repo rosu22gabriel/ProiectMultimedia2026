@@ -94,3 +94,29 @@ html, body {
     background-color: #f0f0f0;
     color: #007bff;
 }
+
+/*Override top, left attributes for specific positioning*/
+#fill-color-selector-menu {
+    top: 75px;
+    left: 505px;
+}
+
+/*Override top, left attributes for specific positioning*/
+#stroke-color-selector-menu { 
+    top: 75px;
+    left: 400px;
+}
+
+.fill-color-option, .stroke-color-option {
+    width: 15px;
+    height: 15px;
+    margin: 5px;
+    border: 1px solid #ccc;
+    cursor: pointer;
+}
+
+.fill-color-option:hover, .stroke-color-option:hover {
+    border-width: 2.5px;
+}
+
+
