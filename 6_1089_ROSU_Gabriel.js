@@ -150,7 +150,6 @@ export class SVGEditor {
 
     constructor(svgCanvasId) {
         this.#svgCanvas = document.getElementById(svgCanvasId);
-        
     }
 
     /**
@@ -179,5 +178,7 @@ export class SVGEditor {
             console.log("No shape is currently selected for deletion.");
         }
     }
+
+    get svgCanvas() { return this.#svgCanvas; }
 }
 

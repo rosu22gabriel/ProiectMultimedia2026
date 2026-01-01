@@ -29,24 +29,13 @@
         <svg id="svg-canvas">Your browser doesn't support SVG</svg>
     </div>
 
-    <script type="module">
-        // Imports from the *.js file
-        import { SVGEditor } from './6_1089_ROSU_Gabriel.js';
-        import { Elipse, Rectangle, Line } from './6_1089_ROSU_Gabriel.js';
 
-        // JavaScript constants for handling DOM elements
-        const undoBtn = document.getElementById('undo-btn');
+    <!-- This script element contains event handlers for interactivity on the page-->
+    <script type="text/javascript">
+        // Event handlers for a pop-up menu of shapes to be selected by the user
         const chooseShapeBtn = document.getElementById('choose-shape-btn');
-        const selectBtn = document.getElementById('select-btn');
-        const drawPathBtn = document.getElementById('draw-path-btn');
-        const exportRasterBtn = document.getElementById('export-raster-btn');
-        const saveAsSvgBtn = document.getElementById('save-as-svg-btn');
-
-
         const shapeSelector = document.getElementById('shape-selector');
 
-        
-        // Event handlers for a pop-up menu of shapes to be selected by the user
         
         // Toggle the menu
         chooseShapeBtn.addEventListener('click', (e) => {
@@ -55,10 +44,12 @@
             shapeSelector.classList.toggle('hidden');
         });
 
+        let currentSelectedShape = null;
+        
         // Select a shape and close menu
         shapeSelector.querySelectorAll('.shape-option').forEach(option => {
             option.addEventListener('click', (e) => {
-                let currentSelectedShape = e.currentTarget.dataset.shape;
+                currentSelectedShape = e.currentTarget.dataset.shape;
                 console.log("Active tool set to:", currentSelectedShape);
                 
                 shapeSelector.classList.add('hidden');
@@ -69,6 +60,21 @@
         document.addEventListener('click', () => {
             shapeSelector.classList.add('hidden');
         });
+    </script>
+
+
+    <!-- This script element contains SVGEditor manipulation logic-->
+    <script type="module">
+        // Imports from the *.js file
+        import { SVGEditor } from './6_1089_ROSU_Gabriel.js';
+        import { Elipse, Rectangle, Line } from './6_1089_ROSU_Gabriel.js';
+
+        // JavaScript constants for handling DOM elements
+        const undoBtn = document.getElementById('undo-btn');
+        const selectBtn = document.getElementById('select-btn');
+        const drawPathBtn = document.getElementById('draw-path-btn');
+        const exportRasterBtn = document.getElementById('export-raster-btn');
+        const saveAsSvgBtn = document.getElementById('save-as-svg-btn');
 
 
         const svgEditor = new SVGEditor('svg-canvas');
@@ -76,8 +82,34 @@
         svgEditor.addShape(new Rectangle(200, 200, 80, 60, "blue", 3));
         svgEditor.addShape(new Line(300, 300, 400, 400, "green", 4));
 
+        // addShape, moveShape, deleteShape
+        
+        // Logic for dropping the selected shape on the SVG canvas
+        // First, the user selects a shape from the pop-up menu (handled in the previous script)
+        // Then, when the user clicks on the SVG canvas, we add the selected shape at that mouse position
 
 
+        svgEditor.svgCanvas.addEventListener('click', (e) => {
+            // Element.getBoundingClientRect() gives the position of the SVG canvas relative to the viewport
+            // We need this to calculate the mouse position within the SVG canvas
+            const rect = svgEditor.svgCanvas.getBoundingClientRect();
+            // Calculate mouse position within the SVG canvas
+            // e.clientX and e.clientY give the mouse position relative to the viewport
+            // Subtract the SVG canvas position to get the position within the SVG canvas
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            if (currentSelectedShape === 'Rectangle') {
+                const newRect = new Rectangle(x - 40, y - 30, 80, 60, "black", 2);
+                svgEditor.addShape(newRect);
+            } else if (currentSelectedShape === 'Elipse') {
+                const newElipse = new Elipse(x, y, 50, 30, "black", 2);
+                svgEditor.addShape(newElipse);
+            } else if (currentSelectedShape === 'Line') {
+                const newLine = new Line(x - 50, y - 50, x + 50, y + 50, "black", 2);
+                svgEditor.addShape(newLine);
+            }
+        });
 
     </script>
 
