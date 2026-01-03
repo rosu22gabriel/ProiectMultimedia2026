@@ -1,12 +1,11 @@
 // This file acts as a library for the SVG Editor
 // It contains support classes for shapes that can be drawn on the canvas and the SVGEditor class itself 
-// which manages the SVG canvas and the shapes
+// which manages the SVG canvas and shape manipulation
 
 const SVG_NS = "http://www.w3.org/2000/svg";
 
 
 // ========================================SHAPE CLASSES======================================== //
-// Even though the SVG 
 
 // Base Shape class
 class Shape {

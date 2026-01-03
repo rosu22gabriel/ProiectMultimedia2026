@@ -236,6 +236,7 @@
     <!-- This script element contains SVGEditor manipulation logic-->
     <script type="module">
 
+        // Import editor and shape classes
         import { SVGEditor, Elipse, Rectangle, Line } from './6_1089_ROSU_Gabriel.js';
 
         // Buttons from the main tool-bar
@@ -245,7 +246,26 @@
         const exportRasterBtn = document.getElementById('export-raster-btn');
         const saveAsSvgBtn    = document.getElementById('save-as-svg-btn');
 
-        // Instance of the SVGEditor class
+        // Simple Save as SVG: serialize current SVG and download
+        saveAsSvgBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const svg = svgEditor.svgCanvas;
+            const serializer = new XMLSerializer();
+            const svgString = '<?xml version="1.0" encoding="UTF-8"?>\n' + serializer.serializeToString(svg);
+            const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'drawing.svg';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+
+            URL.revokeObjectURL(url);
+        });
+
+        // Create the SVG editor instance
         const svgEditor = new SVGEditor('svg-canvas');
 
         // ====================================== SELECTION, DRAG & PROPERTY LOGIC ======================================= \\
@@ -266,6 +286,7 @@
             e.stopPropagation();
             selectMode = !selectMode;
             selectBtn.classList.toggle('active', selectMode);
+
             svgEditor.svgCanvas.style.cursor = selectMode ? 'default' : '';
 
             if (!selectMode) {
@@ -275,7 +296,9 @@
             }
         });
 
+
         // =========================== LOGIC FOR DROPPING SHAPES ON THE CANVAS =================================== \\
+        
         // If we're in select mode, we should not place shapes by clicking the canvas
         svgEditor.svgCanvas.addEventListener('click', (e) => {
             if (selectMode) return; // disable drawing while selecting
@@ -291,6 +314,7 @@
             const y = e.clientY - rect.top;
 
             if (currentSelectedShape === 'Rectangle') {
+                // Subtract half of width and height from x, y so that shape is placed with the cursor in the middle of it
                 const newRect = new Rectangle(x - 40, y - 30, 80, 60, currentSelectedStrokeColor || 'black', currentSelectedFillColor || 'transparent', currentSelectedStrokeWidth || 1);
                 svgEditor.addShape(newRect);
                 justPlacedShape = true;
@@ -301,7 +325,6 @@
                 justPlacedShape = true;
                 setTimeout(() => justPlacedShape = false, 0);
             } else if (currentSelectedShape === 'Line') {
-                // Fixed argument list (was missing comma before strokeWidth)
                 const newLine = new Line(x - 50, y - 50, x + 50, y + 50, currentSelectedStrokeColor || 'black', currentSelectedFillColor || 'transparent', currentSelectedStrokeWidth || 1);
                 svgEditor.addShape(newLine);
                 justPlacedShape = true;
@@ -309,40 +332,42 @@
             }
         });
 
-        // Deselect any selected shape when the user clicks somewhere that is not a shape or a toolbar/menu
-        // but don't do it on the same click that just placed a shape (we want newly placed shapes to remain selected)
+        // Deselect when clicking empty space (ignore immediate post-placement click)
         document.addEventListener('click', (e) => {
             if (justPlacedShape) return; // ignore the immediate post-placement click
 
-            // If clicking on a shape, keep selection logic as-is
-            if (e.target && e.target.shapeObject) return;
+            // keep selection if clicking a shape
+            if (e.target.shapeObject) return;
 
-            // If clicking inside the UI toolbar or popup menus, don't deselect either
-            if (e.target && e.target.closest && (e.target.closest('#tool-bar') || e.target.closest('.popup-menu'))) return;
+            // ignore clicks on the toolbar or menus
+            if (e.target.closest && (e.target.closest('#tool-bar') || e.target.closest('.popup-menu'))) return;
 
             svgEditor.deselectShape();
             shapePropertiesTools.classList.add('hidden');
         });
-        // Helper to update UI-side variables from a shape's properties
-        function updateShapePropertiesUI(shape) {
-            if (!shape) return;
-            currentSelectedStrokeColor = shape.color;
-            currentSelectedFillColor = shape.fillColor;
-            currentSelectedStrokeWidth = shape.strokeWidth;
-        }
 
-        // Start drag / select on mousedown
+        // Helper to update UI-side variables from a shape's properties
+        // function updateShapePropertiesUI(shape) {
+        //     if (!shape) return;
+        //     currentSelectedStrokeColor = shape.color;
+        //     currentSelectedFillColor = shape.fillColor;
+        //     currentSelectedStrokeWidth = shape.strokeWidth;
+        // }
+
+        // ================================== LOGIC FOR MOVING A SHAPE AFTER SELECTION ============================== \\
+
+        // Start selection/dragging on mousedown
         svgEditor.svgCanvas.addEventListener('mousedown', (e) => {
             if (!selectMode) return;
 
-            const targetShape = e.target && e.target.shapeObject;
+            const targetShape = e.target.shapeObject;
             const rect = svgEditor.svgCanvas.getBoundingClientRect();
 
             if (targetShape) {
                 e.stopPropagation();
                 svgEditor.selectShape(targetShape);
                 shapePropertiesTools.classList.remove('hidden');
-                updateShapePropertiesUI(targetShape);
+                // updateShapePropertiesUI(targetShape);
 
                 isDragging = true;
                 draggedShape = targetShape;
@@ -370,8 +395,10 @@
             isDragging = false;
             draggedShape = null;
         });
+        
+        // ============================== LOGIC FOR CHANGING PROPERTIES OF A SELECTED SHAPE ========================= \\
 
-        // Apply changes from the UI variables to the currently selected shape
+        // Apply UI selections to the active shape
         function applyToSelected() {
             const s = svgEditor.getSelectedShape();
             if (!s) return;
@@ -391,11 +418,7 @@
             option.addEventListener('click', () => applyToSelected());
         });
 
-        // Clicking outside closes selection menus (existing behavior) - keep it functional
 
-        // ================================== LOGIC FOR MOVING A SHAPE AFTER SELECTION ============================== \\
-
-        // ============================== LOGIC FOR CHANGING PROPERTIES OF A SELECTED SHAPE ========================= \\
 
         // ================================ LOGIC FOR DELETING SHAPES OFF THE CANVAS ================================ \\
         // Delete selected shape with Backspace or Delete key 
@@ -411,6 +434,40 @@
 
             svgEditor.deleteShape();
             shapePropertiesTools.classList.add('hidden');
+        });
+
+        // ======================================== SAVING AS SVG LOGIC ============================================= \\
+        
+        // Simple Save as SVG: serialize current SVG and download
+        saveAsSvgBtn.addEventListener('click', (e) => {
+            // avoid closing menus by stopping the event
+            e.stopPropagation();
+
+            // get the SVG we want to save
+            const svg = svgEditor.svgCanvas;
+
+            // convert the SVG DOM to an XML string
+            const serializer = new XMLSerializer();
+
+            // add XML header and serialize to a single string
+            const svgString = '<?xml version="1.0" encoding="UTF-8"?>\n' + serializer.serializeToString(svg);
+
+            // make a downloadable file from the SVG text
+            const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+
+            // create a temporary URL for the file
+            const url = URL.createObjectURL(blob);
+
+            // create and click a hidden link to trigger the download
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'drawing.svg';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+
+            // free the temporary URL
+            URL.revokeObjectURL(url);
         });
     </script>
 
