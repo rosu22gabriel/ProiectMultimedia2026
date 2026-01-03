@@ -60,6 +60,10 @@ class Shape {
     get isSelected() { return this._isSelected; }
 
     // Getters and setters for common properties
+    get x() { return this._x; }
+    set x(value) {this._x = value; this.update(); }
+    get y() {return this._y; }
+    set y(value) { this._y = value; this.update(); }
     get color() { return this._color; }
     set color(value) { this._color = value; this.update(); }
     get fillColor() { return this._fillColor; }
@@ -89,8 +93,18 @@ export class Elipse extends Shape {
         ellipse.setAttribute("fill", "none"); // No fill by default
         
         this._element = ellipse;
-        super.update(); // Apply common styles
+        this.update(); // Apply common styles
         return this._element;
+    }
+
+    update() {
+        super.update();
+        if (this._element) {
+            this._element.setAttribute("cx", this._x);
+            this._element.setAttribute("cy", this._y);
+            this._element.setAttribute("rx", this.aRadius);
+            this._element.setAttribute("ry", this.bRadius);
+        }
     }
 
 }
@@ -109,15 +123,19 @@ export class Rectangle extends Shape {
     render() {
         // Create the SVG rect element
         const rect = document.createElementNS(SVG_NS, "rect");
-        rect.setAttribute("x", this._x);
-        rect.setAttribute("y", this._y);
-        rect.setAttribute("width", this._width);
-        rect.setAttribute("height", this._height);
-        rect.setAttribute("fill", "none"); // No fill by default
-
         this._element = rect;
-        super.update(); // Apply common styles
+        this.update();
         return this._element
+    }
+
+    update() {
+        super.update();
+        if (this._element) {
+            this._element.setAttribute("x", this._x);
+            this._element.setAttribute("y", this._y);
+            this._element.setAttribute("width", this._width);
+            this._element.setAttribute("height", this._height);
+        }
     }
 }
 
@@ -135,14 +153,38 @@ export class Line extends Shape {
     render() {
         // Create the SVG line element
         const line = document.createElementNS(SVG_NS, "line");
-        line.setAttribute("x1", this._x);
-        line.setAttribute("y1", this._y);
-        line.setAttribute("x2", this._x2);
-        line.setAttribute("y2", this._y2);
-
         this._element = line;
-        super.update(); // Apply common styles
+        this.update();
         return this._element;
+    }
+
+    update() {
+        super.update();
+        if (this._element) {
+            // For lines, we calculate the difference to move the second point too
+            const dx = this._x2 - this._oldX || 0;
+            const dy = this._y2 - this._oldY || 0;
+
+            this._element.setAttribute("x1", this._x);
+            this._element.setAttribute("y1", this._y);
+            this._element.setAttribute("x2", this._x2);
+            this._element.setAttribute("y2", this._y2);
+        }
+    }
+
+    // Custom setter for the Line shape to move both points together
+
+    set x(value) {
+        const dx = value - this._x;
+        this._x = value;
+        this._x2 += dx;
+        this.update();
+    }
+    set y(value) {
+        const dy = value - this.y;
+        this._y = value;
+        this._y2 += dy;
+        this.update();
     }
 
 }
@@ -173,12 +215,47 @@ export class SVGEditor {
     addShape(shape) {
         this.#shapes.push(shape);
         const svgElement = shape.render();
+        svgElement.shapeObject = shape;
         this.#svgCanvas.appendChild(svgElement);
+        this.selectShape(shape);
+    }
+
+    selectShape(shape) {
+        this.deselectShape();
+        this.#selectedShape = shape;
+        if (shape) {
+            shape.element.classList.add('selected');
+        }
+    }
+
+    deselectShape() {
+        if (this.#selectedShape) {
+            this.#selectedShape.element.classList.remove("selected");
+            this.#selectedShape = null;
+        }
+    }
+
+    // Public getter so external code (UI) can access the currently selected shape
+    getSelectedShape() {
+        return this.#selectedShape;
+    }
+
+    findShapeByElement(element) {
+        return this.#shapes.find(s => s.element === element);
     }
 
     moveShape(shape, newX, newY) {
-        shape._x = newX;
-        shape._y = newY;
+        if (shape instanceof Line) {
+            const dx = newX - shape._x;
+            const dy = newY - shape._y;
+            shape._x = newX;
+            shape._y = newY;
+            shape._x2 += dx;
+            shape._y2 += dy;
+        } else {
+            shape._x = newX;
+            shape._y = newY;
+        }
         shape.update();
     }
 

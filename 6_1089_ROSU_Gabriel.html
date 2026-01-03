@@ -94,7 +94,7 @@
     </div>
 
 
-    <!-------------------------------TOOL-BAR INTERACTIVITY SCRIPT ELEMENT--------------------------------->
+    <!------------------------------- TOOL-BAR INTERACTIVITY SCRIPT ELEMENT --------------------------------->
     <!-- This script element contains event handlers for interactivity on the page i.e. interactivity of 
          the selection menus of the interface -->
 
@@ -229,7 +229,7 @@
     </script>
 
 
-    <!----------------------------SVG-EDITOR LOGIC--------------------------------------->
+    <!---------------------------- SVG-EDITOR LOGIC --------------------------------------->
     <!-- This script element contains SVGEditor manipulation logic-->
     <script type="module">
         // SVGEditor import
@@ -247,9 +247,37 @@
         // Instance of the SVGEditor class
         const svgEditor = new SVGEditor('svg-canvas');
 
-        // ===========================LOGIC FOR DROPPING SHAPES ON THE CANVAS=================================== \\
+        // ====================================== SELECTION, DRAG & PROPERTY LOGIC ======================================= \\
+        // 'Select mode' allows the user to click shapes to select them and drag to move them.
 
+        // Make selectMode available to the drop handler so drawing can be disabled in select mode
+        let selectMode = false;
+        let isDragging = false;
+        let draggedShape = null;
+        const dragOffset = { x: 0, y: 0 };
+
+        // Small flag to avoid deselecting immediately on the same click that places a shape
+        let justPlacedShape = false;
+
+        // Toggle select mode when the Select button is clicked
+        selectBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            selectMode = !selectMode;
+            selectBtn.classList.toggle('active', selectMode);
+            svgEditor.svgCanvas.style.cursor = selectMode ? 'default' : '';
+
+            if (!selectMode) {
+                // Exiting select mode: deselect any selection and hide properties
+                svgEditor.deselectShape();
+                shapePropertiesTools.classList.add('hidden');
+            }
+        });
+
+        // =========================== LOGIC FOR DROPPING SHAPES ON THE CANVAS =================================== \\
+        // If we're in select mode, we should not place shapes by clicking the canvas
         svgEditor.svgCanvas.addEventListener('click', (e) => {
+            if (selectMode) return; // disable drawing while selecting
+
             // Element.getBoundingClientRect() gives the position of the SVG canvas relative to the viewport
             // We need this to calculate the mouse position within the SVG canvas
             const rect = svgEditor.svgCanvas.getBoundingClientRect();
@@ -261,18 +289,113 @@
             const y = e.clientY - rect.top;
 
             if (currentSelectedShape === 'Rectangle') {
-                const newRect = new Rectangle(x - 40, y - 30, 80, 60, currentSelectedStrokeColor, currentSelectedFillColor, currentSelectedStrokeWidth);
+                const newRect = new Rectangle(x - 40, y - 30, 80, 60, currentSelectedStrokeColor || 'black', currentSelectedFillColor || 'transparent', currentSelectedStrokeWidth || 1);
                 svgEditor.addShape(newRect);
+                justPlacedShape = true;
+                setTimeout(() => justPlacedShape = false, 0);
             } else if (currentSelectedShape === 'Elipse') {
-                const newElipse = new Elipse(x, y, 50, 30, currentSelectedStrokeColor, currentSelectedFillColor, currentSelectedStrokeWidth);
+                const newElipse = new Elipse(x, y, 50, 30, currentSelectedStrokeColor || 'black', currentSelectedFillColor || 'transparent', currentSelectedStrokeWidth || 1);
                 svgEditor.addShape(newElipse);
+                justPlacedShape = true;
+                setTimeout(() => justPlacedShape = false, 0);
             } else if (currentSelectedShape === 'Line') {
-                const newLine = new Line(x - 50, y - 50, x + 50, y + 50, currentSelectedStrokeColor, currentSelectedFillColor. currentSelectedStrokeWidth);
+                // Fixed argument list (was missing comma before strokeWidth)
+                const newLine = new Line(x - 50, y - 50, x + 50, y + 50, currentSelectedStrokeColor || 'black', currentSelectedFillColor || 'transparent', currentSelectedStrokeWidth || 1);
                 svgEditor.addShape(newLine);
+                justPlacedShape = true;
+                setTimeout(() => justPlacedShape = false, 0);
             }
         });
 
-        // Logic for moving a selected shape
+        // Deselect any selected shape when the user clicks somewhere that is not a shape or a toolbar/menu
+        // but don't do it on the same click that just placed a shape (we want newly placed shapes to remain selected)
+        document.addEventListener('click', (e) => {
+            if (justPlacedShape) return; // ignore the immediate post-placement click
+
+            // If clicking on a shape, keep selection logic as-is
+            if (e.target && e.target.shapeObject) return;
+
+            // If clicking inside the UI toolbar or popup menus, don't deselect either
+            if (e.target && e.target.closest && (e.target.closest('#tool-bar') || e.target.closest('.popup-menu'))) return;
+
+            svgEditor.deselectShape();
+            shapePropertiesTools.classList.add('hidden');
+        });
+        // Helper to update UI-side variables from a shape's properties
+        function updateShapePropertiesUI(shape) {
+            if (!shape) return;
+            currentSelectedStrokeColor = shape.color;
+            currentSelectedFillColor = shape.fillColor;
+            currentSelectedStrokeWidth = shape.strokeWidth;
+        }
+
+        // Start drag / select on mousedown
+        svgEditor.svgCanvas.addEventListener('mousedown', (e) => {
+            if (!selectMode) return;
+
+            const targetShape = e.target && e.target.shapeObject;
+            const rect = svgEditor.svgCanvas.getBoundingClientRect();
+
+            if (targetShape) {
+                e.stopPropagation();
+                svgEditor.selectShape(targetShape);
+                shapePropertiesTools.classList.remove('hidden');
+                updateShapePropertiesUI(targetShape);
+
+                isDragging = true;
+                draggedShape = targetShape;
+
+                dragOffset.x = e.clientX - rect.left - draggedShape.x;
+                dragOffset.y = e.clientY - rect.top - draggedShape.y;
+            } else {
+                // clicked an empty area -> deselect
+                svgEditor.deselectShape();
+                shapePropertiesTools.classList.add('hidden');
+            }
+        });
+
+        // Dragging: move the shape while mouse moves
+        window.addEventListener('mousemove', (e) => {
+            if (!isDragging || !draggedShape) return;
+            const rect = svgEditor.svgCanvas.getBoundingClientRect();
+            const newX = e.clientX - rect.left - dragOffset.x;
+            const newY = e.clientY - rect.top - dragOffset.y;
+            svgEditor.moveShape(draggedShape, newX, newY);
+        });
+
+        // End dragging
+        window.addEventListener('mouseup', () => {
+            isDragging = false;
+            draggedShape = null;
+        });
+
+        // Apply changes from the UI variables to the currently selected shape
+        function applyToSelected() {
+            const s = svgEditor.getSelectedShape();
+            if (!s) return;
+            if (currentSelectedStrokeColor) s.color = currentSelectedStrokeColor;
+            if (currentSelectedFillColor) s.fillColor = currentSelectedFillColor;
+            if (currentSelectedStrokeWidth !== null) s.strokeWidth = Number(currentSelectedStrokeWidth);
+        }
+
+        // Re-hook the option buttons (they already update the currentSelected* variables) to also apply changes to the selected shape
+        document.querySelectorAll('#width-selector-menu .width-option').forEach(option => {
+            option.addEventListener('click', () => applyToSelected());
+        });
+        document.querySelectorAll('#fill-color-selector-menu .fill-color-option').forEach(option => {
+            option.addEventListener('click', () => applyToSelected());
+        });
+        document.querySelectorAll('#stroke-color-selector-menu .stroke-color-option').forEach(option => {
+            option.addEventListener('click', () => applyToSelected());
+        });
+
+        // Clicking outside closes selection menus (existing behavior) - keep it functional
+
+        // ================================== LOGIC FOR MOVING A SHAPE AFTER SELECTION ============================== \\
+
+        // ============================== LOGIC FOR CHANGING PROPERTIES OF A SELECTED SHAPE ========================= \\
+
+
         // When the user clicks the "Select" button, they can click on a shape to select it and drop it to a new position
     </script>
 

@@ -119,4 +119,19 @@ html, body {
     border-width: 2.5px;
 }
 
+.selected {
+    stroke-dasharray: 5;
+    stroke: #007bff !important;
+    cursor: move;
+}
+
+/* Visual state for active tools (for example, Select mode) */
+#tool-bar .tool.active {
+    background-color: #007bff;
+    color: white;
+}
+#tool-bar .tool.active:hover {
+    background-color: #0056b3;
+}
+
 
