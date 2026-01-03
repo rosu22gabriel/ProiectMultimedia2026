@@ -395,6 +395,24 @@
 
         // ============================== LOGIC FOR CHANGING PROPERTIES OF A SELECTED SHAPE ========================= \\
 
+        // Delete selected shape with Backspace or Delete key (ignores typing in inputs/textareas)
+        document.addEventListener('keydown', (e) => {
+            if (e.key !== 'Backspace' && e.key !== 'Delete') return;
+
+            // If the user is focused on an input, textarea or contenteditable, don't intercept the key
+            const active = document.activeElement;
+            if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable)) return;
+
+            // Only act if a shape is currently selected
+            const selected = svgEditor.getSelectedShape();
+            if (!selected) return;
+
+            // Prevent default browser behavior (e.g., navigating back)
+            e.preventDefault();
+
+            svgEditor.deleteShape();
+            shapePropertiesTools.classList.add('hidden');
+        });
 
         // When the user clicks the "Select" button, they can click on a shape to select it and drop it to a new position
     </script>
