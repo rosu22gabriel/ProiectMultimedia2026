@@ -95,7 +95,7 @@
 
 
     <!------------------------------- TOOL-BAR INTERACTIVITY SCRIPT ELEMENT --------------------------------->
-    <!-- This script element contains event handlers for interactivity on the page i.e. interactivity of 
+    <!-- This script element contains event handlers for interactivity on the page, interactivity of 
         the selection menus of the interface -->
 
     <script type="text/javascript">
@@ -318,23 +318,26 @@
                 const newRect = new Rectangle(x - 40, y - 30, 80, 60, currentSelectedStrokeColor || 'black', currentSelectedFillColor || 'transparent', currentSelectedStrokeWidth || 1);
                 svgEditor.addShape(newRect);
                 justPlacedShape = true;
+                // keep this true for the current click so the document click handler won't immediately deselect
                 setTimeout(() => justPlacedShape = false, 0);
             } else if (currentSelectedShape === 'Elipse') {
                 const newElipse = new Elipse(x, y, 50, 30, currentSelectedStrokeColor || 'black', currentSelectedFillColor || 'transparent', currentSelectedStrokeWidth || 1);
                 svgEditor.addShape(newElipse);
                 justPlacedShape = true;
+                // keep this true for the current click so the document click handler won't immediately deselect
                 setTimeout(() => justPlacedShape = false, 0);
             } else if (currentSelectedShape === 'Line') {
                 const newLine = new Line(x - 50, y - 50, x + 50, y + 50, currentSelectedStrokeColor || 'black', currentSelectedFillColor || 'transparent', currentSelectedStrokeWidth || 1);
                 svgEditor.addShape(newLine);
                 justPlacedShape = true;
+                // keep this true for the current click so the document click handler won't immediately deselect
                 setTimeout(() => justPlacedShape = false, 0);
             }
         });
 
-        // Deselect when clicking empty space (ignore immediate post-placement click)
+        // Deselect when clicking empty space (ignore immediate after drop click)
         document.addEventListener('click', (e) => {
-            if (justPlacedShape) return; // ignore the immediate post-placement click
+            if (justPlacedShape) return; // ignore the immediate after drop click
 
             // keep selection if clicking a shape
             if (e.target.shapeObject) return;
@@ -407,7 +410,7 @@
             if (currentSelectedStrokeWidth !== null) s.strokeWidth = Number(currentSelectedStrokeWidth);
         }
 
-        // Re-hook the option buttons (they already update the currentSelected* variables) to also apply changes to the selected shape
+        // Have the option buttons apply their currentSelected* values to the selected shape.
         document.querySelectorAll('#width-selector-menu .width-option').forEach(option => {
             option.addEventListener('click', () => applyToSelected());
         });
@@ -429,7 +432,7 @@
             const selected = svgEditor.getSelectedShape();
             if (!selected) return;
 
-            // Prevent default browser behavior (e.g., navigating back)
+            // Prevent default browser behavior (for example navigating back)
             e.preventDefault();
 
             svgEditor.deleteShape();
@@ -437,7 +440,7 @@
         });
 
         // ======================================== SAVING AS SVG LOGIC ============================================= \\
-        
+
         // Simple Save as SVG: serialize current SVG and download
         saveAsSvgBtn.addEventListener('click', (e) => {
             // avoid closing menus by stopping the event
