@@ -22,9 +22,9 @@
 
         <!-- This div element contains a pop-up menu that only appears when the user click on the Choose Shape button -->
         <div id="shape-selector-menu" class="popup-menu hidden">
-            <div class="shape-option" data-shape="Rectangle" title="Rectangle"><i class="bi bi-square"></i></div>
-            <div class="shape-option" data-shape="Elipse" title="Elipse"><i class="bi bi-circle"></i></div>
-            <div class="shape-option" data-shape="Line" title="Line"><i class="bi bi-dash"></i></div>
+            <div class="shape-option" data-shape="Rectangle" title="Rectangle"> <i class="bi bi-square"> </i></div>
+            <div class="shape-option" data-shape="Elipse"    title="Elipse">    <i class="bi bi-circle"> </i></div>
+            <div class="shape-option" data-shape="Line"      title="Line">      <i class="bi bi-dash">   </i></div>
         </div>
         
         <button class="tool" id="draw-path-btn">
@@ -53,10 +53,10 @@
 
             <!--This div element contains a pop-up menu that only appears when the user click on the Select Stroke Color button. -->
             <div id="stroke-color-selector-menu" class="popup-menu hidden"> 
-                <div class="stroke-color-option" data-stroke-color="red" style="background-color: red"></div>
-                <div class="stroke-color-option" data-stroke-color="blue" style="background-color: blue"></div>
-                <div class="stroke-color-option" data-stroke-color="green" style="background-color: green"></div>
-                <div class="stroke-color-option" data-stroke-color="black" style="background-color: black"></div>
+                <div class="stroke-color-option" data-stroke-color="red"    style="background-color: red"></div>
+                <div class="stroke-color-option" data-stroke-color="blue"   style="background-color: blue"></div>
+                <div class="stroke-color-option" data-stroke-color="green"  style="background-color: green"></div>
+                <div class="stroke-color-option" data-stroke-color="black"  style="background-color: black"></div>
             </div>
 
             <button class="tool" id="select-stroke-width-btn" title="Select Stroke Width">
@@ -77,10 +77,10 @@
 
             <!--This div element contains a pop-up menu that only appears when the user clicks on the Select Fill Color button. -->
             <div id="fill-color-selector-menu" class="popup-menu hidden">
-                <div class="fill-color-option" data-fill-color="red" style="background-color: red"></div>
-                <div class="fill-color-option" data-fill-color="blue" style="background-color: blue"></div>
-                <div class="fill-color-option" data-fill-color="green" style="background-color: green"></div>
-                <div class="fill-color-option" data-fill-color="black" style="background-color: black"></div>
+                <div class="fill-color-option" data-fill-color="red"    style="background-color: red"></div>
+                <div class="fill-color-option" data-fill-color="blue"   style="background-color: blue"></div>
+                <div class="fill-color-option" data-fill-color="green"  style="background-color: green"></div>
+                <div class="fill-color-option" data-fill-color="black"  style="background-color: black"></div>
             </div>
         </div>
         
@@ -96,7 +96,7 @@
 
     <!------------------------------- TOOL-BAR INTERACTIVITY SCRIPT ELEMENT --------------------------------->
     <!-- This script element contains event handlers for interactivity on the page i.e. interactivity of 
-         the selection menus of the interface -->
+        the selection menus of the interface -->
 
     <script type="text/javascript">
         // Buttons of the main tool-bar
@@ -127,12 +127,10 @@
 
         // Toggle the shape selection menu
         chooseShapeBtn.addEventListener('click', (e) => {
-            // Stop propagation so clicking the button doesn't trigger "close" listeners
+            // .stopPropagation() prevents the menu from immediate closing.
             e.stopPropagation(); 
 
-            // .toggle(hidden) eliminates the token 'hidden' from the classList of the HTML element
-            // which is already existing in the list of classes of this element because it needs to stay 'hidden' on the
-            // page until clicking the choose-shape-btn.
+            // classList.toggle('hidden') toggles the 'hidden' class to show the shape selector menu
             shapeSelectorMenu.classList.toggle('hidden'); 
         });
 
@@ -151,8 +149,7 @@
         
         // Close shape selection menu if user clicks anywhere else
         document.addEventListener('click', () => {
-            // This adds the 'hidden' token, which was previously removed by the click event listener,
-            // to the list of classes of the element so that it remains hidden 
+            // classList.toggle('hidden') toggles the 'hidden' class to hide the shape selector menu
             shapeSelectorMenu.classList.add('hidden');
         });
 
@@ -161,16 +158,20 @@
 
         // Toggle the stroke width selection menu
         selectStrokeWidthBtn.addEventListener('click', (e) => {
-            e.stopPropagation(); // Stop propagation so clicking the button doesn't trigger "close" listeners
+            //.stopPropagation() prevents the menu from immediate closing.
+            e.stopPropagation();
+
+            // classList.toggle('hidden') toggles the 'hidden' class to show the shape selector menu
             widthSelectorMenu.classList.toggle('hidden');
         });
 
-
+        // Select a stroke width option then close the menu
         widthSelectorMenu.querySelectorAll('.width-option').forEach(option => {
             option.addEventListener('click', (e) => {
                 currentSelectedStrokeWidth = e.currentTarget.dataset.width;
                 console.log("Active width option set to:", `${currentSelectedStrokeWidth}px`);
                 
+                // classList.toggle('hidden') toggles the 'hidden' class to hide the width selector menu
                 widthSelectorMenu.classList.toggle('hidden');
             })
         })
@@ -185,7 +186,8 @@
 
         // Toggle the fill color selection menu
         selectFillColorBtn.addEventListener('click', (e) => {
-            e.stopPropagation(); // Stop propagation so clicking the button doesn't trigger "close" listeners
+            //.stopPropagation() prevents the menu from immediate closing.
+            e.stopPropagation();
             fillColorSelectorMenu.classList.toggle('hidden');
         });
 
@@ -208,7 +210,8 @@
 
         // Toggle the stroke color selection menu
         selectStrokeColorBtn.addEventListener('click', (e) => {
-            e.stopPropagation(); // Stop propagation so clicking the button doesn't trigger "close" listeners
+            //.stopPropagation() prevents the menu from immediate closing.
+            e.stopPropagation();
             strokeColorSelectorMenu.classList.toggle('hidden');
         });
 
@@ -232,10 +235,8 @@
     <!---------------------------- SVG-EDITOR LOGIC --------------------------------------->
     <!-- This script element contains SVGEditor manipulation logic-->
     <script type="module">
-        // SVGEditor import
-        import { SVGEditor } from './6_1089_ROSU_Gabriel.js';
-        // Shape imports
-        import { Elipse, Rectangle, Line } from './6_1089_ROSU_Gabriel.js';
+
+        import { SVGEditor, Elipse, Rectangle, Line } from './6_1089_ROSU_Gabriel.js';
 
         // Buttons from the main tool-bar
         const undoBtn         = document.getElementById('undo-btn');
@@ -248,6 +249,7 @@
         const svgEditor = new SVGEditor('svg-canvas');
 
         // ====================================== SELECTION, DRAG & PROPERTY LOGIC ======================================= \\
+
         // 'Select mode' allows the user to click shapes to select them and drag to move them.
 
         // Make selectMode available to the drop handler so drawing can be disabled in select mode
@@ -395,13 +397,10 @@
 
         // ============================== LOGIC FOR CHANGING PROPERTIES OF A SELECTED SHAPE ========================= \\
 
-        // Delete selected shape with Backspace or Delete key (ignores typing in inputs/textareas)
+        // ================================ LOGIC FOR DELETING SHAPES OFF THE CANVAS ================================ \\
+        // Delete selected shape with Backspace or Delete key 
         document.addEventListener('keydown', (e) => {
             if (e.key !== 'Backspace' && e.key !== 'Delete') return;
-
-            // If the user is focused on an input, textarea or contenteditable, don't intercept the key
-            const active = document.activeElement;
-            if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable)) return;
 
             // Only act if a shape is currently selected
             const selected = svgEditor.getSelectedShape();
@@ -413,8 +412,6 @@
             svgEditor.deleteShape();
             shapePropertiesTools.classList.add('hidden');
         });
-
-        // When the user clicks the "Select" button, they can click on a shape to select it and drop it to a new position
     </script>
 
 </body>
